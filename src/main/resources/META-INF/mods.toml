@@ -1,0 +1,26 @@
+modLoader="javafml"
+loaderVersion="[43,)"
+license="GPL3"
+
+[[mods]]
+modId="tac"
+version="0.4.0"
+displayName="Timeless and Classics"
+updateJSONURL=""
+displayURL=""
+authors="Timeless Development Team"
+description='''
+'''
+
+[[dependencies.tac]]
+modId="forge"
+mandatory=true
+versionRange="[43,)"
+ordering="NONE"
+side="BOTH"
+[[dependencies.tac]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.19.1, 1.19.2)"
+ordering="NONE"
+side="BOTH"
