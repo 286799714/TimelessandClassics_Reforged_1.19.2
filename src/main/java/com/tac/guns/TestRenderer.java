@@ -5,6 +5,14 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.tac.guns.graph.*;
 import com.tac.guns.graph.math.LocalMatrix4f;
 import com.tac.guns.graph.math.LocalVector3f;
+import net.minecraft.Util;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.chat.ClientChatPreview;
+import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.gui.screens.ChatScreen;
+import net.minecraft.network.chat.CommonComponents;
+import net.minecraft.network.chat.Component;
+import org.lwjgl.assimp.AINode;
 import org.lwjgl.assimp.AIScene;
 import org.lwjgl.assimp.Assimp;
 
@@ -120,6 +128,7 @@ public enum TestRenderer {
 
     ModelPart modelPart;
     Model model;
+    AIScene scene;
 
     public void render(PoseStack poseStack){
         if(!init){
@@ -133,6 +142,13 @@ public enum TestRenderer {
                 model.putModelPart(modelPart);
                 modelPart.setExtraMatrix(LocalMatrix4f.createTranslateMatrix(0F,0f,-3f));
                 init = true;
+                try(AIScene aiScene = Assimp.aiImportFile("C:\\Users\\魏宇强\\test.gltf",aiProcess_Triangulate
+                        | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights)){
+                    if(aiScene == null) return;
+                    scene = aiScene;
+                }catch (Exception e){
+                    throw new RuntimeException(e);
+                }
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
@@ -140,7 +156,7 @@ public enum TestRenderer {
         modelPart.rotate(new LocalVector3f(0,0.5f,0f));
         LocalMatrix4f projectionMatrix = new LocalMatrix4f(RenderSystem.getProjectionMatrix());
         LocalMatrix4f worldMatrix =  LocalMatrix4f.createTranslateMatrix(0F,0f,0f);
-
+        Minecraft.getInstance().getWindow().setTitle(scene.mName().dataString());
         renderer.render(projectionMatrix, worldMatrix, model);
     }
 }
