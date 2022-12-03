@@ -120,7 +120,7 @@ task copyLibs(type: Copy){
     }
     from {
         configurations.runtimeClasspath.findAll {
-            it.name.contains('lwjgl-assimp') && it.name.contains('natives-windows')
+            it.name.contains('lwjgl-assimp') && it.name.contains(project.ext.lwjglNatives)
         }.collect {
             zipTree it
         }

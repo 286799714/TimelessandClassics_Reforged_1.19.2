@@ -5,14 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.tac.guns.graph.*;
 import com.tac.guns.graph.math.LocalMatrix4f;
 import com.tac.guns.graph.math.LocalVector3f;
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.chat.ClientChatPreview;
-import net.minecraft.client.gui.components.ChatComponent;
-import net.minecraft.client.gui.screens.ChatScreen;
-import net.minecraft.network.chat.CommonComponents;
-import net.minecraft.network.chat.Component;
-import org.lwjgl.assimp.AINode;
 import org.lwjgl.assimp.AIScene;
 import org.lwjgl.assimp.Assimp;
 
