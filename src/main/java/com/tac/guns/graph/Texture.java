@@ -1,9 +1,15 @@
 package com.tac.guns.graph;
 
+import com.tac.guns.graph.util.Buffers;
+import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 import org.lwjgl.system.MemoryStack;
+import org.lwjgl.system.MemoryUtil;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
@@ -22,13 +28,20 @@ public class Texture {
     }
 
     public Texture(String texturePath) {
+        ByteBuffer imageBuffer;
+        try {
+            imageBuffer = Buffers.loadResourceForJar(texturePath);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
         try (MemoryStack stack = MemoryStack.stackPush()) {
             this.texturePath = texturePath;
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
 
-            ByteBuffer buf = stbi_load(texturePath, w, h, channels, 4);
+            ByteBuffer buf = stbi_load_from_memory(imageBuffer, w, h, channels, 4);
             if (buf == null) {
                 throw new RuntimeException("Image file [" + texturePath + "] not loaded: " + stbi_failure_reason());
             }

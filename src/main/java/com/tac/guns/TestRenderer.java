@@ -5,11 +5,17 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.tac.guns.graph.*;
 import com.tac.guns.graph.math.LocalMatrix4f;
 import com.tac.guns.graph.math.LocalVector3f;
+import com.tac.guns.graph.util.Buffers;
 import net.minecraft.client.Minecraft;
 import org.lwjgl.assimp.AIScene;
 import org.lwjgl.assimp.Assimp;
 
+import java.io.IOException;
+import java.nio.ByteBuffer;
+
 import static org.lwjgl.assimp.Assimp.*;
+import static org.lwjgl.opengl.GL11.glDisable;
+import static org.lwjgl.opengl.GL11C.GL_CULL_FACE;
 
 public enum TestRenderer {
     INSTANCE;
@@ -116,27 +122,28 @@ public enum TestRenderer {
             16, 18, 19, 17, 16, 19,
             // Back face
             4, 6, 7, 5, 4, 7,};
-    Renderer renderer;
-    Mesh mesh;
+    com.tac.guns.graph.Renderer renderer;
+    com.tac.guns.graph.Mesh mesh;
 
-    ModelPart modelPart;
-    Model model;
+    com.tac.guns.graph.ModelPart modelPart;
+    com.tac.guns.Model model;
     AIScene scene;
 
     public void render(PoseStack poseStack){
         if(!init){
             try {
-                renderer = new Renderer();
+
+                renderer = new com.tac.guns.graph.Renderer();
                 renderer.init();
-                Texture texture = new Texture("C:\\testS.png");
-                mesh = new Mesh(positions, textCoords, indices, texture);
-                modelPart = new ModelPart(mesh, "test");
-                model = new Model("test");
+                com.tac.guns.graph.Texture texture = new com.tac.guns.graph.Texture("assets/tac/textures/test.png");
+                mesh = new com.tac.guns.graph.Mesh(positions, textCoords, indices, texture);
+                modelPart = new com.tac.guns.graph.ModelPart(mesh, "test");
+                model = new com.tac.guns.Model("test");
                 model.putModelPart(modelPart);
                 modelPart.setExtraMatrix(LocalMatrix4f.createTranslateMatrix(0F,0f,-3f));
                 init = true;
-                try(AIScene aiScene = Assimp.aiImportFile("C:\\Users\\魏宇强\\test.gltf",aiProcess_Triangulate
-                        | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights)){
+                try(AIScene aiScene = Assimp.aiImportFileFromMemory(Buffers.loadResourceForJar("assets/tac/models/test.gltf"),aiProcess_Triangulate
+                        | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights, (ByteBuffer) null)){
                     if(aiScene == null) return;
                     scene = aiScene;
                 }catch (Exception e){
@@ -150,6 +157,7 @@ public enum TestRenderer {
         LocalMatrix4f projectionMatrix = new LocalMatrix4f(RenderSystem.getProjectionMatrix());
         LocalMatrix4f worldMatrix =  LocalMatrix4f.createTranslateMatrix(0F,0f,0f);
         Minecraft.getInstance().getWindow().setTitle(scene.mName().dataString());
+        glDisable(GL_CULL_FACE);
         renderer.render(projectionMatrix, worldMatrix, model);
     }
 }

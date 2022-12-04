@@ -4,6 +4,10 @@ package com.tac.guns.graph.util;
  * The following code is from project JgLTF, using MIT license
  * Copyright 2015-2016 Marco Hutter - http://www.javagl.de
  */
+import com.tac.guns.graph.Texture;
+import org.apache.commons.io.IOUtils;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -155,7 +159,7 @@ public class Buffers
      */
     public static InputStream createByteBufferInputStream(ByteBuffer byteBuffer)
     {
-        return new ByteBufferInputStream(byteBuffer);
+        return new com.tac.guns.graph.util.ByteBufferInputStream(byteBuffer);
     }
 
 
@@ -339,6 +343,13 @@ public class Buffers
     private Buffers()
     {
         // Private constructor to prevent instantiation
+    }
+
+    public static ByteBuffer loadResourceForJar(String resourceName) throws IOException {
+        InputStream in = Texture.class.getClassLoader().getResourceAsStream(resourceName);
+        byte[] bytes = IOUtils.toByteArray(in);
+        ByteBuffer byteBuffer = Buffers.create(bytes);
+        return byteBuffer;
     }
 
 }
