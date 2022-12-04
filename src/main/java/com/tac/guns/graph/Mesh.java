@@ -2,6 +2,7 @@ package com.tac.guns.graph;
 
 import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
+import java.util.List;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import org.lwjgl.opengl.*;
@@ -27,19 +28,28 @@ public class Mesh {
 
     private final int vertexCount;
 
-    public Mesh(float[] positions, float[] textCoords, int[] indices, Texture texture) {
+    public Mesh(List<Float> positions, List<Float> textCoords, List<Integer> indices, Texture texture) {
         FloatBuffer verticesBuffer = null;
         IntBuffer indicesBuffer = null;
         FloatBuffer textCoordsBuffer = null;
         this.texture = texture;
         try {
-            vertexCount = indices.length;
-            verticesBuffer = memAllocFloat(positions.length);
-            verticesBuffer.put(positions).flip();
-            indicesBuffer = MemoryUtil.memAllocInt(indices.length);
-            indicesBuffer.put(indices).flip();
-            textCoordsBuffer = MemoryUtil.memAllocFloat(textCoords.length);
-            textCoordsBuffer.put(textCoords).flip();
+            vertexCount = indices.size();
+            verticesBuffer = memAllocFloat(positions.size());
+            for(float position : positions){
+                verticesBuffer.put(position);
+            }
+            verticesBuffer.flip();
+            indicesBuffer = MemoryUtil.memAllocInt(indices.size());
+            for(int indice : indices){
+                indicesBuffer.put(indice);
+            }
+            indicesBuffer.flip();
+            textCoordsBuffer = MemoryUtil.memAllocFloat(textCoords.size());
+            for(float coord : textCoords){
+                textCoordsBuffer.put(coord);
+            }
+            textCoordsBuffer.flip();
 
             int currentVAO = GL11.glGetInteger(GL30.GL_VERTEX_ARRAY_BINDING);
             int currentVBO = GL11.glGetInteger(GL_ARRAY_BUFFER_BINDING);
