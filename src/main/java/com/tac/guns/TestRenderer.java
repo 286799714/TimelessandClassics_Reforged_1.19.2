@@ -128,7 +128,7 @@ public enum TestRenderer {
             try {
                 renderer = new Renderer();
                 renderer.init();
-                Texture texture = new Texture("C:\\test.png");
+                Texture texture = new Texture("C:\\testS.png");
                 mesh = new Mesh(positions, textCoords, indices, texture);
                 modelPart = new ModelPart(mesh, "test");
                 model = new Model("test");
