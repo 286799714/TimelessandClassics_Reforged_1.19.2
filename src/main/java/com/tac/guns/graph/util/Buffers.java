@@ -5,6 +5,9 @@ package com.tac.guns.graph.util;
  * Copyright 2015-2016 Marco Hutter - http://www.javagl.de
  */
 import com.tac.guns.graph.Texture;
+import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
 
 import java.io.IOException;
@@ -345,11 +348,10 @@ public class Buffers
         // Private constructor to prevent instantiation
     }
 
-    public static ByteBuffer loadResourceForJar(String resourceName) throws IOException {
-        InputStream in = Texture.class.getClassLoader().getResourceAsStream(resourceName);
+    public static ByteBuffer getByteBufferFromResource(ResourceLocation resourceLocation) throws IOException {
+        Resource resource = Minecraft.getInstance().getResourceManager().getResource(resourceLocation).orElseThrow();
+        InputStream in = resource.open();
         byte[] bytes = IOUtils.toByteArray(in);
-        ByteBuffer byteBuffer = Buffers.create(bytes);
-        return byteBuffer;
+        return Buffers.create(bytes);
     }
-
 }

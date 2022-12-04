@@ -1,6 +1,7 @@
 package com.tac.guns.graph;
 
 import com.tac.guns.graph.util.Buffers;
+import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -20,30 +21,27 @@ import static org.lwjgl.stb.STBImage.*;
 public class Texture {
 
     private int textureId;
-    private String texturePath;
 
     public Texture(int width, int height, ByteBuffer buf) {
-        this.texturePath = "";
         generateTexture(width, height, buf);
     }
 
-    public Texture(String texturePath) {
+    public Texture(ResourceLocation resourceLocation){
         ByteBuffer imageBuffer;
         try {
-            imageBuffer = Buffers.loadResourceForJar(texturePath);
+            imageBuffer = Buffers.getByteBufferFromResource(resourceLocation);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            this.texturePath = texturePath;
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
 
             ByteBuffer buf = stbi_load_from_memory(imageBuffer, w, h, channels, 4);
             if (buf == null) {
-                throw new RuntimeException("Image file [" + texturePath + "] not loaded: " + stbi_failure_reason());
+                throw new RuntimeException("Image file [" + resourceLocation.getPath() + "] not loaded: " + stbi_failure_reason());
             }
 
             int width = w.get();
@@ -73,9 +71,5 @@ public class Texture {
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0,
                 GL_RGBA, GL_UNSIGNED_BYTE, buf);
         glGenerateMipmap(GL_TEXTURE_2D);
-    }
-
-    public String getTexturePath() {
-        return texturePath;
     }
 }

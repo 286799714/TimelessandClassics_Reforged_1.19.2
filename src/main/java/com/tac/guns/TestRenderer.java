@@ -7,17 +7,23 @@ import com.tac.guns.graph.math.LocalMatrix4f;
 import com.tac.guns.graph.math.LocalVector3f;
 import com.tac.guns.graph.util.Buffers;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import org.apache.commons.io.IOUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 import org.lwjgl.system.MemoryStack;
 
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.Optional;
 
 import static org.lwjgl.assimp.Assimp.*;
 import static org.lwjgl.opengl.GL11.glDisable;
@@ -46,10 +52,15 @@ public enum TestRenderer {
             try {
                 renderer = new com.tac.guns.graph.Renderer();
                 renderer.init();
-                try(AIScene aiScene = Assimp.aiImportFileFromMemory(Buffers.loadResourceForJar("assets/tac/models/test.glb"),aiProcess_Triangulate
-                        | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights, (ByteBuffer) null)){
+                ResourceLocation modelResource = new ResourceLocation("tac", "models/test.glb");
+                String[] spilt = modelResource.getPath().split("\\.");
+                String hint = spilt[spilt.length - 1];
+                try( AIScene aiScene = Assimp.aiImportFileFromMemory(
+                        Buffers.getByteBufferFromResource(modelResource),
+                        aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights,
+                        new StringBuffer(hint)) ){
                     if(aiScene == null) return;
-                    com.tac.guns.graph.Texture texture = new com.tac.guns.graph.Texture("assets/tac/textures/test.png");
+                    com.tac.guns.graph.Texture texture = new com.tac.guns.graph.Texture(new ResourceLocation("tac", "textures/test.png"));
                     scene = aiScene;
                     loadNode(scene.mRootNode());
                     mesh = new Mesh(vertices, uv, ind, texture);
