@@ -46,10 +46,10 @@ public enum TestRenderer {
             try {
                 renderer = new com.tac.guns.graph.Renderer();
                 renderer.init();
-                com.tac.guns.graph.Texture texture = new com.tac.guns.graph.Texture("assets/tac/textures/test.png");
                 try(AIScene aiScene = Assimp.aiImportFileFromMemory(Buffers.loadResourceForJar("assets/tac/models/test.glb"),aiProcess_Triangulate
                         | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights, (ByteBuffer) null)){
                     if(aiScene == null) return;
+                    com.tac.guns.graph.Texture texture = new com.tac.guns.graph.Texture("assets/tac/textures/test.png");
                     scene = aiScene;
                     loadNode(scene.mRootNode());
                     mesh = new Mesh(vertices, uv, ind, texture);
