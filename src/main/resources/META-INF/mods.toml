@@ -1,24 +1,24 @@
 modLoader="javafml"
 loaderVersion="[43,)"
-license="GPL3"
+license="The MIT License"
 
 [[mods]]
-modId="tac"
-version="0.4.0"
-displayName="Timeless and Classics"
+modId="renderengine"
+version="${file.jarVersion}"
+displayName="Render Engine"
 updateJSONURL=""
 displayURL=""
-authors="Timeless Development Team"
+authors="Maydaymemory and Arcomit"
 description='''
 '''
 
-[[dependencies.tac]]
+[[dependencies.renderengine]]
 modId="forge"
 mandatory=true
 versionRange="[43,)"
 ordering="NONE"
 side="BOTH"
-[[dependencies.tac]]
+[[dependencies.renderengine]]
 modId="minecraft"
 mandatory=true
 versionRange="[1.19.1, 1.19.2)"

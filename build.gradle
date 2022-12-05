@@ -11,18 +11,20 @@ plugins {
     id 'eclipse'
     id 'maven-publish'
     id 'net.minecraftforge.gradle' version '5.1.+'
+    id 'org.parchmentmc.librarian.forgegradle' version '1.+'
 }
 apply plugin: 'org.spongepowered.mixin'
 
-version = "0.4.1.100-1.19.2"
-group = "com.tac"
-archivesBaseName = "tac"
+version = "0.0.1-1.19.2"
+group = "render.engine"
+archivesBaseName = "renderengine"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 println "Java: ${System.getProperty 'java.version'}, JVM: ${System.getProperty 'java.vm.version'} (${System.getProperty 'java.vendor'}), Arch: ${System.getProperty 'os.arch'}"
 minecraft {
-    mappings channel: 'official', version: '1.19.2'
+    //mappings channel: 'official', version: '1.19.2'
+    mappings channel: 'parchment', version: '2022.11.27-1.19.2'
 
     runs {
         client {
@@ -30,12 +32,12 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
 
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'info'
 
-            property 'forge.enabledGameTestNamespaces', 'tac'
+            property 'forge.enabledGameTestNamespaces', 'renderengine'
 
             mods {
-                tac {
+                renderengine {
                     source sourceSets.main
                 }
             }
@@ -46,28 +48,12 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
 
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'info'
 
-            property 'forge.enabledGameTestNamespaces', 'examplemod'
-
-            mods {
-                tac {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        gameTestServer {
-            workingDirectory project.file('run')
-
-            property 'forge.logging.markers', 'REGISTRIES'
-
-            property 'forge.logging.console.level', 'debug'
-
-            property 'forge.enabledGameTestNamespaces', 'examplemod'
+            property 'forge.enabledGameTestNamespaces', 'renderengine'
 
             mods {
-                tac {
+                renderengine {
                     source sourceSets.main
                 }
             }
@@ -78,13 +64,13 @@ minecraft {
 
             property 'forge.logging.markers', 'REGISTRIES'
 
-            property 'forge.logging.console.level', 'debug'
+            property 'forge.logging.console.level', 'info'
 
             // Specify the modid for data generation, where to output the resulting resource, and where to look for existing resources.
-            args '--mod', 'examplemod', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
+            args '--mod', 'renderengine', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
 
             mods {
-                tac {
+                renderengine {
                     source sourceSets.main
                 }
             }
@@ -133,8 +119,8 @@ classes{
 }
 
 mixin {
-    add sourceSets.main, 'mixins.tac.refmap.json'
-    config 'mixins.tac.json'
+    add sourceSets.main, 'refmap.renderengine.json'
+    config 'mixins.renderengine.json'
     debug.verbose = true
     debug.export = true
 }
@@ -142,14 +128,14 @@ mixin {
 jar {
     manifest {
         attributes([
-                "Specification-Title": "Timeless and Classics",
-                "Specification-Vendor": "ClumsyAlien",
-                "Specification-Version": "0.04",
-                "Implementation-Title": "Timeless and Classics",
+                "Specification-Title": "RenderEngine",
+                "Specification-Vendor": "Arcomit",
+                "Specification-Version": "1",
+                "Implementation-Title": "RenderEngine",
                 "Implementation-Version": project.version,
-                "Implementation-Vendor" : "ClumsyAlien",
+                "Implementation-Vendor" : "Arcomit",
                 "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConfigs": "mixins.tac.json"
+                "MixinConfigs": "mixins.renderengine.json"
         ])
     }
 }

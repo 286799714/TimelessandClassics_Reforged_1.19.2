@@ -1,0 +1,12 @@
+{
+  "package": "render.engine.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "required": true,
+  "refmap": "refmap.renderengine.json",
+  "mixins": [],
+  "client": [],
+  "server": [],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
