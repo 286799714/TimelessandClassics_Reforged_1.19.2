@@ -28,11 +28,15 @@ public class Mesh {
 
     private final int vertexCount;
 
-    public Mesh(List<Float> positions, List<Float> textCoords, List<Integer> indices, Texture texture) {
+    private final int materialInd;
+
+
+    public Mesh(List<Float> positions, List<Float> textCoords, List<Integer> indices,int materialInd, Texture texture) {
         FloatBuffer verticesBuffer = null;
         IntBuffer indicesBuffer = null;
         FloatBuffer textCoordsBuffer = null;
         this.texture = texture;
+        this.materialInd = materialInd;
         try {
             vertexCount = indices.size();
             verticesBuffer = memAllocFloat(positions.size());

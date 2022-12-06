@@ -39,6 +39,7 @@ public enum TestRenderer {
     private final List<Float> vertices = new ArrayList<>();
     private final List<Float> uv = new ArrayList<>();
     private final List<Integer> ind = new ArrayList<>();
+    private int matInd = 0;
 
     Renderer renderer;
     Mesh mesh;
@@ -52,7 +53,7 @@ public enum TestRenderer {
             try {
                 renderer = new com.tac.guns.graph.Renderer();
                 renderer.init();
-                ResourceLocation modelResource = new ResourceLocation("tac", "models/test.glb");
+                ResourceLocation modelResource = new ResourceLocation("tac", "models/test2.glb");
                 String[] spilt = modelResource.getPath().split("\\.");
                 String hint = spilt[spilt.length - 1];
                 try( AIScene aiScene = Assimp.aiImportFileFromMemory(
@@ -60,10 +61,10 @@ public enum TestRenderer {
                         aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights,
                         new StringBuffer(hint)) ){
                     if(aiScene == null) return;
-                    com.tac.guns.graph.Texture texture = new com.tac.guns.graph.Texture(new ResourceLocation("tac", "textures/test.png"));
+                    com.tac.guns.graph.Texture texture = new com.tac.guns.graph.Texture(aiScene);
                     scene = aiScene;
                     loadNode(scene.mRootNode());
-                    mesh = new Mesh(vertices, uv, ind, texture);
+                    mesh = new Mesh(vertices, uv, ind,matInd, texture);
                 }catch (Exception e){
                     throw new RuntimeException(e);
                 }
@@ -94,11 +95,20 @@ public enum TestRenderer {
             this.vertices.add(ver.z());
         }
 
-        AIVector3D.Buffer buffer = mesh.mTextureCoords(0);
-        if(buffer != null) while (buffer.remaining() > 0) {
-            AIVector3D textCoord = buffer.get();
+        AIVector3D.Buffer texcoords = mesh.mTextureCoords(0);
+        if(texcoords != null) while (texcoords.remaining() > 0) {
+            AIVector3D textCoord = texcoords.get();
             uv.add(textCoord.x());
             uv.add(1 - textCoord.y());
+        }
+
+        this.matInd = mesh.mMaterialIndex();
+
+        PointerBuffer aiMaterials = scene.mMaterials();
+        int numMaterials = scene.mNumMaterials();
+        for (int i = 0; i < numMaterials; i++) {
+            AIMaterial aiMaterial = AIMaterial.create(aiMaterials.get(i));
+
         }
 
         AIFace.Buffer faces = mesh.mFaces();
