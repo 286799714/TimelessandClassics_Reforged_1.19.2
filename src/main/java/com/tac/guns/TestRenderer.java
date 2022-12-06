@@ -55,7 +55,11 @@ public enum TestRenderer {
             try {
                 renderer = new com.tac.guns.graph.Renderer();
                 renderer.init();
-                ResourceLocation modelResource = new ResourceLocation("tac", "models/test2.glb");
+                //test1是正常的模型
+                //test2是多材质模型
+                //test3是复杂的多分层多材质模型
+                //test4是复杂的多材质模型（模型无分层）
+                ResourceLocation modelResource = new ResourceLocation("tac", "models/test4.glb");
                 String[] spilt = modelResource.getPath().split("\\.");
                 String hint = spilt[spilt.length - 1];
                 try( AIScene aiScene = Assimp.aiImportFileFromMemory(
@@ -139,17 +143,19 @@ public enum TestRenderer {
             return;
         }
         List<AIMesh> meshes = readMesh(node);
-        assert meshes != null;
-        for(AIMesh mesh : meshes){
-            loadMesh(mesh);
-        }
+        if (meshes != null){
+            //assert meshes != null;
+            for(AIMesh mesh : meshes){
+                loadMesh(mesh);
+            }
 
-        PointerBuffer children = node.mChildren();
-        int childrenNum = node.mNumChildren();
-        for(int i = 0; i < childrenNum; i++){
-            assert children != null;
-            AINode child = AINode.create(children.get(i));
-            loadNode(child);
+            PointerBuffer children = node.mChildren();
+            int childrenNum = node.mNumChildren();
+            for(int i = 0; i < childrenNum; i++){
+                assert children != null;
+                AINode child = AINode.create(children.get(i));
+                loadNode(child);
+            }
         }
     }
 
