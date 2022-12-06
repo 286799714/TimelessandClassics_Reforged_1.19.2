@@ -39,7 +39,7 @@ public enum TestRenderer {
     private final List<Float> vertices = new ArrayList<>();
     private final List<Float> uv = new ArrayList<>();
     private final List<Integer> ind = new ArrayList<>();
-    private int matInd = 0;
+    private String textName = "";
 
     Renderer renderer;
     Mesh mesh;
@@ -47,6 +47,8 @@ public enum TestRenderer {
     com.tac.guns.graph.ModelPart modelPart;
     com.tac.guns.Model model;
     AIScene scene;
+
+    int i = 0;
 
     public void render(PoseStack poseStack){
         if(!init){
@@ -61,28 +63,29 @@ public enum TestRenderer {
                         aiProcess_Triangulate | aiProcess_CalcTangentSpace | aiProcess_LimitBoneWeights,
                         new StringBuffer(hint)) ){
                     if(aiScene == null) return;
-                    com.tac.guns.graph.Texture texture = new com.tac.guns.graph.Texture(aiScene);
                     scene = aiScene;
+                    model = new Model("test");
                     loadNode(scene.mRootNode());
-                    mesh = new Mesh(vertices, uv, ind,matInd, texture);
                 }catch (Exception e){
                     throw new RuntimeException(e);
                 }
-                modelPart = new ModelPart(mesh, "test");
-                model = new Model("test");
-                model.putModelPart(modelPart);
-                modelPart.setExtraMatrix(LocalMatrix4f.createTranslateMatrix(0F,0f,-6f));
+                for(ModelPart modelPart : model.getModelParts().values()) {
+                    modelPart.setExtraMatrix(LocalMatrix4f.createTranslateMatrix(0F,0f,-6f));
+                }
                 init = true;
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
         }
-        modelPart.rotate(new LocalVector3f(0,0.5f,0f));
+        for(ModelPart modelPart : model.getModelParts().values()) {
+            modelPart.rotate(new LocalVector3f(0,0.5f,0f));
+        }
         LocalMatrix4f projectionMatrix = new LocalMatrix4f(RenderSystem.getProjectionMatrix());
         LocalMatrix4f worldMatrix =  LocalMatrix4f.createTranslateMatrix(0F,0f,0f);
         Minecraft.getInstance().getWindow().setTitle(scene.mName().dataString());
         glDisable(GL_CULL_FACE);
         renderer.render(projectionMatrix, worldMatrix, model);
+        i=0;
     }
 
     public void loadMesh(AIMesh mesh){
@@ -102,21 +105,11 @@ public enum TestRenderer {
             uv.add(1 - textCoord.y());
         }
 
-        this.matInd = mesh.mMaterialIndex();
 
         PointerBuffer aiMaterials = scene.mMaterials();
-        int numMaterials = scene.mNumMaterials();
-        for (int i = 0; i < numMaterials; i++) {
-            AIMaterial aiMaterial = AIMaterial.create(aiMaterials.get(i));//这里的get换成mesh的mMaterialIndex就是该mesh的材质
-            //----------------------分割线
-            AIString path = AIString.calloc();
-            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, path, (IntBuffer) null, null, null, null, null, null);
-            String textPath = path.dataString();//材质所使用的纹理名字
-            /*
-            AITexture texture = AITexture.create(textures.get(i));
-            texture.mFilename();
-             */
-        }
+        AIMaterial aiMaterial = AIMaterial.create(aiMaterials.get(mesh.mMaterialIndex()));
+        AIString texName = AIString.calloc();//材质所使用的纹理名字
+        Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, texName, (IntBuffer) null, null, null, null, null, null);
 
         AIFace.Buffer faces = mesh.mFaces();
         int numFaces = mesh.mNumFaces();
@@ -128,6 +121,17 @@ public enum TestRenderer {
                 this.ind.add(indices.get(j));
             }
         }
+        com.tac.guns.graph.Texture texture = new com.tac.guns.graph.Texture(scene,texName);
+
+        this.mesh = new Mesh(this.vertices, uv, ind, texture);
+        this.vertices.clear();
+        this.uv.clear();
+        this.ind.clear();
+        textName = "";
+
+        modelPart = new ModelPart(this.mesh, "test" + i);
+        i++;
+        model.putModelPart(modelPart);
     }
 
     public void loadNode(AINode node){

@@ -5,6 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import org.apache.commons.io.IOUtils;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.AIScene;
+import org.lwjgl.assimp.AIString;
 import org.lwjgl.assimp.AITexture;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -56,24 +57,29 @@ public class Texture {
         }
     }
 
-    public Texture(AIScene scene){
+    public Texture(AIScene scene,AIString textName){
         PointerBuffer textures = scene.mTextures();
         for(int i = 0; i < scene.mNumTextures(); i++){
             try (MemoryStack stack = MemoryStack.stackPush()) {
                 AITexture texture = AITexture.create(textures.get(i));
-                IntBuffer w = stack.mallocInt(1);
-                IntBuffer h = stack.mallocInt(1);
-                IntBuffer channels = stack.mallocInt(1);
-                ByteBuffer buf = stbi_load_from_memory(texture.pcDataCompressed(), w, h, channels, 4);
-                if (buf == null) {
-                    throw new RuntimeException("name's embedded textures not loaded: " + stbi_failure_reason());//todo
+                if (texture.mFilename().equals(textName)){
+                    IntBuffer w = stack.mallocInt(1);
+                    IntBuffer h = stack.mallocInt(1);
+                    IntBuffer channels = stack.mallocInt(1);
+                    ByteBuffer buf = stbi_load_from_memory(texture.pcDataCompressed(), w, h, channels, 4);
+                    if (buf == null) {
+                        throw new RuntimeException("name's embedded textures not loaded: " + stbi_failure_reason());//todo
+                    }
+                    int width = w.get();
+                    int height = h.get();
+
+                    generateTexture(width, height, buf);
+
+                    stbi_image_free(buf);
+                }else {
+                    System.out.println(texture.mFilename().dataString());
+                    System.out.println("textName:" + textName.dataString());
                 }
-                int width = w.get();
-                int height = h.get();
-
-                generateTexture(width, height, buf);
-
-                stbi_image_free(buf);
             }
         }
     }
