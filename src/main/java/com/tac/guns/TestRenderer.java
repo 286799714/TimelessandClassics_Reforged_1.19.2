@@ -107,10 +107,15 @@ public enum TestRenderer {
         PointerBuffer aiMaterials = scene.mMaterials();
         int numMaterials = scene.mNumMaterials();
         for (int i = 0; i < numMaterials; i++) {
-            AIMaterial aiMaterial = AIMaterial.create(aiMaterials.get(i));
+            AIMaterial aiMaterial = AIMaterial.create(aiMaterials.get(i));//这里的get换成mesh的mMaterialIndex就是该mesh的材质
+            //----------------------分割线
             AIString path = AIString.calloc();
             Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, path, (IntBuffer) null, null, null, null, null, null);
             String textPath = path.dataString();//材质所使用的纹理名字
+            /*
+            AITexture texture = AITexture.create(textures.get(i));
+            texture.mFilename();
+             */
         }
 
         AIFace.Buffer faces = mesh.mFaces();
