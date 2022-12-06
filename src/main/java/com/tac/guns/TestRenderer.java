@@ -108,7 +108,9 @@ public enum TestRenderer {
         int numMaterials = scene.mNumMaterials();
         for (int i = 0; i < numMaterials; i++) {
             AIMaterial aiMaterial = AIMaterial.create(aiMaterials.get(i));
-
+            AIString path = AIString.calloc();
+            Assimp.aiGetMaterialTexture(aiMaterial, aiTextureType_DIFFUSE, 0, path, (IntBuffer) null, null, null, null, null, null);
+            String textPath = path.dataString();//材质所使用的纹理名字
         }
 
         AIFace.Buffer faces = mesh.mFaces();
