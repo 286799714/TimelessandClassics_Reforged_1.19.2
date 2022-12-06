@@ -63,7 +63,7 @@ public enum TestRenderer {
                 //test2是多材质模型
                 //test3是复杂的多分层多材质模型
                 //test4是复杂的多材质模型（模型无分层）
-                ResourceLocation modelResource = new ResourceLocation("tac", "models/test3.glb");
+                ResourceLocation modelResource = new ResourceLocation("tac", "models/test.gltf");
                 String[] spilt = modelResource.getPath().split("\\.");
                 String hint = spilt[spilt.length - 1];
                 try( AIScene aiScene = Assimp.aiImportFileFromMemory(
