@@ -59,8 +59,8 @@ public class Texture {
 
     public Texture(AIScene scene,AIString textName){
         PointerBuffer textures = scene.mTextures();
-        int i = Integer.parseInt(textName.dataString().replace("*",""));
         try (MemoryStack stack = MemoryStack.stackPush()) {
+            int i = Integer.parseInt(textName.dataString().replace("*",""));
             AITexture texture = AITexture.create(textures.get(i));
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
@@ -75,7 +75,7 @@ public class Texture {
             generateTexture(width, height, buf);
 
             stbi_image_free(buf);
-        }
+        }catch (NumberFormatException ignore){}
     }
 
 

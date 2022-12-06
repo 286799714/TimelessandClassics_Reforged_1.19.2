@@ -2,14 +2,17 @@ package com.tac.guns;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 import com.tac.guns.graph.*;
 import com.tac.guns.graph.math.LocalMatrix4f;
+import com.tac.guns.graph.math.LocalQuaternion;
 import com.tac.guns.graph.math.LocalVector3f;
 import com.tac.guns.graph.util.Buffers;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import org.apache.commons.io.IOUtils;
+import org.checkerframework.checker.units.qual.A;
 import org.lwjgl.PointerBuffer;
 import org.lwjgl.assimp.*;
 import org.lwjgl.system.MemoryStack;
@@ -47,6 +50,7 @@ public enum TestRenderer {
     com.tac.guns.graph.ModelPart modelPart;
     com.tac.guns.Model model;
     AIScene scene;
+    PoseStack poseStack = new PoseStack();
 
     int i = 0;
 
@@ -59,7 +63,7 @@ public enum TestRenderer {
                 //test2是多材质模型
                 //test3是复杂的多分层多材质模型
                 //test4是复杂的多材质模型（模型无分层）
-                ResourceLocation modelResource = new ResourceLocation("tac", "models/test4.glb");
+                ResourceLocation modelResource = new ResourceLocation("tac", "models/test3.glb");
                 String[] spilt = modelResource.getPath().split("\\.");
                 String hint = spilt[spilt.length - 1];
                 try( AIScene aiScene = Assimp.aiImportFileFromMemory(
@@ -74,7 +78,7 @@ public enum TestRenderer {
                     throw new RuntimeException(e);
                 }
                 for(ModelPart modelPart : model.getModelParts().values()) {
-                    modelPart.setExtraMatrix(LocalMatrix4f.createTranslateMatrix(0F,0f,-6f));
+                    //modelPart.translate(new LocalVector3f(0F,-1.5f,-3f));
                 }
                 init = true;
             }catch (Exception e){
@@ -82,17 +86,17 @@ public enum TestRenderer {
             }
         }
         for(ModelPart modelPart : model.getModelParts().values()) {
-            modelPart.rotate(new LocalVector3f(0,0.5f,0f));
+            //modelPart.rotate(new LocalVector3f(0,0.5f,0f));
         }
         LocalMatrix4f projectionMatrix = new LocalMatrix4f(RenderSystem.getProjectionMatrix());
-        LocalMatrix4f worldMatrix =  LocalMatrix4f.createTranslateMatrix(0F,0f,0f);
+        LocalMatrix4f worldMatrix =  LocalMatrix4f.createTranslateMatrix(0F,-1f,-2.5f);
         Minecraft.getInstance().getWindow().setTitle(scene.mName().dataString());
         glDisable(GL_CULL_FACE);
         renderer.render(projectionMatrix, worldMatrix, model);
         i=0;
     }
 
-    public void loadMesh(AIMesh mesh){
+    public void loadMesh(AIMesh mesh, AINode node){
         AIVector3D.Buffer vertices = mesh.mVertices();
         int numVertices = mesh.mNumVertices();
         for(int i = 0; i < numVertices; i++){
@@ -134,6 +138,7 @@ public enum TestRenderer {
         textName = "";
 
         modelPart = new ModelPart(this.mesh, "test" + i);
+        modelPart.setExtraMatrix(new LocalMatrix4f(poseStack.last().pose()));
         i++;
         model.putModelPart(modelPart);
     }
@@ -142,21 +147,23 @@ public enum TestRenderer {
         if(node == null) {
             return;
         }
+        poseStack.pushPose();
+        poseStack.mulPoseMatrix(new LocalMatrix4f(node.mTransformation()).getMatrix4f());
         List<AIMesh> meshes = readMesh(node);
-        if (meshes != null){
+        if (meshes != null) {
             //assert meshes != null;
-            for(AIMesh mesh : meshes){
-                loadMesh(mesh);
-            }
-
-            PointerBuffer children = node.mChildren();
-            int childrenNum = node.mNumChildren();
-            for(int i = 0; i < childrenNum; i++){
-                assert children != null;
-                AINode child = AINode.create(children.get(i));
-                loadNode(child);
+            for (AIMesh mesh : meshes) {
+                loadMesh(mesh, node);
             }
         }
+        PointerBuffer children = node.mChildren();
+        int childrenNum = node.mNumChildren();
+        for(int i = 0; i < childrenNum; i++){
+            assert children != null;
+            AINode child = AINode.create(children.get(i));
+            loadNode(child);
+        }
+        poseStack.popPose();
     }
 
     public List<AIMesh> readMesh(AINode node){
@@ -172,20 +179,14 @@ public enum TestRenderer {
         return meshList;
     }
 
-    public void loadEmbeddedTexture(){
-        PointerBuffer textures = scene.mTextures();
-        for(int i = 0; i < scene.mNumTextures(); i++){
-            try (MemoryStack stack = MemoryStack.stackPush()) {
-                AITexture texture = AITexture.create(textures.get(i));
-                IntBuffer w = stack.mallocInt(1);
-                IntBuffer h = stack.mallocInt(1);
-                IntBuffer channels = stack.mallocInt(1);
-                ByteBuffer buf = stbi_load_from_memory(texture.pcDataCompressed(), w, h, channels, 4);
-                if (buf == null) {
-                    throw new RuntimeException("name's embedded textures not loaded: " + stbi_failure_reason());//todo
-                }
-                //todo with buf
-            }
+    public static LocalMatrix4f computeGlobalTransform(AINode node) {
+        AINode currentNode = node;
+        LocalMatrix4f matrix = new LocalMatrix4f();
+        matrix.setIdentity();
+        while (currentNode != null){
+            matrix.multiply(new LocalMatrix4f(currentNode.mTransformation()));
+            currentNode = currentNode.mParent();
         }
+        return matrix;
     }
 }
