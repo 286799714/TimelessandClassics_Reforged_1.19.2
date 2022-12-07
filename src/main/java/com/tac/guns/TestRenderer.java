@@ -63,7 +63,7 @@ public enum TestRenderer {
                 //test2是多材质模型
                 //test3是复杂的多分层多材质模型
                 //test4是复杂的多材质模型（模型无分层）
-                ResourceLocation modelResource = new ResourceLocation("tac", "models/test.gltf");
+                ResourceLocation modelResource = new ResourceLocation("tac", "models/test5.glb");
                 String[] spilt = modelResource.getPath().split("\\.");
                 String hint = spilt[spilt.length - 1];
                 try( AIScene aiScene = Assimp.aiImportFileFromMemory(
@@ -129,6 +129,7 @@ public enum TestRenderer {
                 this.ind.add(indices.get(j));
             }
         }
+
         com.tac.guns.graph.Texture texture = new com.tac.guns.graph.Texture(scene,texName);
 
         this.mesh = new Mesh(this.vertices, uv, ind, texture);
@@ -138,7 +139,7 @@ public enum TestRenderer {
         textName = "";
 
         modelPart = new ModelPart(this.mesh, "test" + i);
-        modelPart.setExtraMatrix(new LocalMatrix4f(poseStack.last().pose()));
+        modelPart.setExtraMatrix(new LocalMatrix4f(poseStack.last().pose().copy()));
         i++;
         model.putModelPart(modelPart);
     }

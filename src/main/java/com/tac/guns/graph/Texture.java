@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
+import java.util.regex.Pattern;
 
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.opengl.GL30.glGenerateMipmap;
@@ -57,15 +58,34 @@ public class Texture {
         }
     }
 
+
+
     public Texture(AIScene scene,AIString textName){
         PointerBuffer textures = scene.mTextures();
+        String textureName = textName.dataString();
         try (MemoryStack stack = MemoryStack.stackPush()) {
-            int i = Integer.parseInt(textName.dataString().replace("*",""));
-            AITexture texture = AITexture.create(textures.get(i));
             IntBuffer w = stack.mallocInt(1);
             IntBuffer h = stack.mallocInt(1);
             IntBuffer channels = stack.mallocInt(1);
-            ByteBuffer buf = stbi_load_from_memory(texture.pcDataCompressed(), w, h, channels, 4);
+            ByteBuffer buf;
+
+            //ps:文件名不可包含*，所以可以只用这个判断是否为镶嵌纹理
+            if (textureName.startsWith("*")){
+                int i = Integer.parseInt(textureName.replace("*",""));
+                AITexture texture = AITexture.create(textures.get(i));
+                buf = stbi_load_from_memory(texture.pcDataCompressed(), w, h, channels, 4);
+            }else{
+                ResourceLocation resourceLocation = new ResourceLocation("tac","textures/" + textureName);
+                ByteBuffer imageBuffer;
+                try {
+                    imageBuffer = Buffers.getByteBufferFromResource(resourceLocation);
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+                buf = stbi_load_from_memory(imageBuffer, w, h, channels, 4);
+            }
+
             if (buf == null) {
                 throw new RuntimeException("name's embedded textures not loaded: " + stbi_failure_reason());//todo
             }
